@@ -1,0 +1,53 @@
+version: "3"
+services:
+  admindatabase:
+    image: postgres
+    environment:
+      - POSTGRES_USER=abhay
+      - POSTGRES_PASSWORD=user@123
+      - POSTGRES_DB=microadmindb
+    volumes:
+      - microserviceadminvolume:/var/lib/postgresql/data
+  adminnestapp:
+    build: "./admin_service/"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - admindatabase
+    volumes:
+      - ./admin_service/src:/app/src #for rebuild on file change
+  userdatabase:
+    image: postgres
+    environment:
+      - POSTGRES_USER=abhay
+      - POSTGRES_PASSWORD=user@123
+      - POSTGRES_DB=microuserdb
+    volumes:
+      - microserviceuservolume:/var/lib/postgresql/data
+  usernestapp:
+    build: "./user_service/"
+    ports:
+      - "3001:3001"
+    depends_on:
+      - userdatabase
+    volumes:
+      - ./user_service/src:/app/src #for rebuild on file change
+  rabbitmq:
+    image: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root123
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+  notificationapp:
+    build: "./notification/"
+    volumes:
+      - ./notification/src:/app/src #for rebuild on file change
+
+volumes:
+  microserviceadminvolume:
+  microserviceuservolume:
+  rabbitmq-data:
